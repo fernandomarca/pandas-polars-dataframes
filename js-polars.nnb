@@ -1,0 +1,105 @@
+{
+    "cells": [
+        {
+            "language": "typescript",
+            "source": [
+                "import pl from 'nodejs-polars';\n\nconst df = pl.DataFrame(\n  {\n      \"A\": [1, 2, 3, 4, 5],\n      \"fruits\": [\"banana\", \"banana\", \"apple\", \"apple\", \"banana\"],\n      \"B\": [5, 4, 3, 2, 1],\n      \"cars\": [\"beetle\", \"audi\", \"beetle\", \"beetle\", \"beetle\"],\n      \"optional\": [28, 300, null, 2, -30],\n  }\n);\n\nconst predicate = pl.col(\"fruits\").str.contains(\"^b.*\")\ndf.select(predicate);\n\ndf[\"cars\"]"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "text/plain",
+                            "value": [
+                                "shape: (5,)",
+                                "Series: 'cars' [str]",
+                                "[",
+                                "\t\"beetle\"",
+                                "\t\"audi\"",
+                                "\t\"beetle\"",
+                                "\t\"beetle\"",
+                                "\t\"beetle\"",
+                                "]"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "import pl from 'nodejs-polars';\n\nconst df = pl.DataFrame(\n  {\n      \"A\": [1, 2, 3, 4, 5],\n      \"fruits\": [\"banana\", \"banana\", \"apple\", \"apple\", \"banana\"],\n      \"B\": [5, 4, 3, 2, 1],\n      \"cars\": [\"beetle\", \"audi\", \"beetle\", \"beetle\", \"beetle\"],\n      \"optional\": [28, 300, null, 2, -30],\n  }\n);\n\ndf.sort(\"fruits\")\n   .select(\n     \"fruits\",\n     \"cars\",\n     pl.lit(\"fruits\").alias(\"literal_string_fruits\"),\n     pl.col(\"B\").filter(pl.col(\"cars\").eq(pl.lit(\"beetle\"))).sum(),\n     pl.col(\"A\").filter(pl.col(\"B\").gt(2)).sum().over(\"cars\").alias(\"sum_A_by_cars\"),\n     pl.col(\"A\").sum().over(\"fruits\").alias(\"sum_A_by_fruits\"),\n     pl.col(\"A\").reverse().over(\"fruits\").alias(\"rev_A_by_fruits\"),\n   );"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "text/plain",
+                            "value": [
+                                "shape: (1, 5)",
+                                "┌─────┬────────┬─────┬────────┬──────────┐",
+                                "│ A   ┆ fruits ┆ B   ┆ cars   ┆ optional │",
+                                "│ --- ┆ ---    ┆ --- ┆ ---    ┆ ---      │",
+                                "│ f64 ┆ str    ┆ f64 ┆ str    ┆ f64      │",
+                                "╞═════╪════════╪═════╪════════╪══════════╡",
+                                "│ 1.0 ┆ banana ┆ 5.0 ┆ beetle ┆ 28.0     │",
+                                "└─────┴────────┴─────┴────────┴──────────┘"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "import pl from 'nodejs-polars';\ndf.filter(pl.col(\"B\").gt(4))\n"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "text/plain",
+                            "value": [
+                                "shape: (1, 5)",
+                                "┌─────┬────────┬─────┬────────┬──────────┐",
+                                "│ A   ┆ fruits ┆ B   ┆ cars   ┆ optional │",
+                                "│ --- ┆ ---    ┆ --- ┆ ---    ┆ ---      │",
+                                "│ f64 ┆ str    ┆ f64 ┆ str    ┆ f64      │",
+                                "╞═════╪════════╪═════╪════════╪══════════╡",
+                                "│ 1.0 ┆ banana ┆ 5.0 ┆ beetle ┆ 28.0     │",
+                                "└─────┴────────┴─────┴────────┴──────────┘"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "language": "typescript",
+            "source": [
+                "import pl from 'nodejs-polars';\n\ndf.select(\n  pl.col(\"A\").filter(pl.col(\"fruits\").str.contains(\"^b.*\")).sum(),\n  (pl.col(\"B\").filter(pl.col(\"cars\").str.contains(\"^b.*\")).sum()).alias(\"some_compute()\"),\n  pl.col(\"B\").sum().alias(\"teste\")\n)"
+            ],
+            "outputs": [
+                {
+                    "items": [
+                        {
+                            "mime": "text/plain",
+                            "value": [
+                                "shape: (1, 3)",
+                                "┌─────┬────────────────┬───────┐",
+                                "│ A   ┆ some_compute() ┆ teste │",
+                                "│ --- ┆ ---            ┆ ---   │",
+                                "│ f64 ┆ f64            ┆ f64   │",
+                                "╞═════╪════════════════╪═══════╡",
+                                "│ 8.0 ┆ 11.0           ┆ 15.0  │",
+                                "└─────┴────────────────┴───────┘"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
